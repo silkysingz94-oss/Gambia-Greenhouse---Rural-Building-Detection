@@ -1,0 +1,1681 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBoS GEOAI | Gambia Building Intelligence</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+<style>
+:root{
+  --navy:#10243a;
+  --blue:#1769aa;
+  --cyan:#16a6b6;
+  --green:#29966b;
+  --orange:#e18b37;
+  --red:#d9534f;
+  --bg:#edf2f7;
+  --panel:#ffffff;
+  --text:#243447;
+  --muted:#718096;
+  --border:#dce4ed;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  background:linear-gradient(120deg,#10243a,#174c73);
+  color:white;
+  padding:17px 22px;
+}
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.brand{
+  font-size:12px;
+  font-weight:bold;
+  letter-spacing:2px;
+  color:#80dce3;
+}
+header h1{
+  font-size:23px;
+  margin:8px 0 5px;
+}
+header p{
+  margin:0;
+  color:#d7e7f4;
+  font-size:13px;
+}
+.status{
+  background:#1c765d;
+  padding:7px 12px;
+  border-radius:20px;
+  font-size:11px;
+}
+main{
+  padding:14px;
+}
+.toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+button,select,input{
+  font:inherit;
+}
+button{
+  border:0;
+  border-radius:5px;
+  padding:9px 12px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:bold;
+}
+button.primary{background:var(--blue);color:white}
+button.secondary{background:#e5edf5;color:#234}
+button.success{background:var(--green);color:white}
+button.warning{background:#f1a348;color:#222}
+button.danger{background:#b94747;color:white}
+button:disabled{opacity:.5;cursor:not-allowed}
+select,input[type="text"],input[type="number"]{
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:8px;
+  background:white;
+  width:100%;
+  color:var(--text);
+  font-size:12px;
+}
+input[type="file"]{
+  width:100%;
+  font-size:11px;
+  margin-top:6px;
+}
+.dashboard{
+  display:grid;
+  grid-template-columns:minmax(255px,1fr) minmax(400px,1.45fr) minmax(275px,1fr);
+  gap:12px;
+  align-items:stretch;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  min-width:0;
+}
+.panel-heading{
+  padding:12px 14px;
+  background:#f7f9fc;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  font-weight:bold;
+  color:#213b56;
+}
+.panel-body{
+  padding:13px;
+}
+.side-scroll{
+  height:calc(100vh - 220px);
+  min-height:620px;
+  overflow-y:auto;
+}
+.section{
+  padding-bottom:13px;
+  margin-bottom:13px;
+  border-bottom:1px solid #edf0f4;
+}
+.section:last-child{border-bottom:0}
+.section h3{
+  font-size:12px;
+  margin:0 0 9px;
+  color:#344c65;
+}
+.field{
+  margin-bottom:9px;
+}
+.field label{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+.help{
+  font-size:10px;
+  line-height:1.5;
+  color:var(--muted);
+  margin-top:5px;
+}
+.check-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:11px;
+  margin:7px 0;
+}
+.check-row input{accent-color:var(--blue)}
+#map{
+  height:calc(100vh - 220px);
+  min-height:620px;
+  width:100%;
+  background:#dce7ec;
+}
+.map-wrap{position:relative}
+.map-label{
+  position:absolute;
+  z-index:500;
+  top:10px;
+  left:50px;
+  background:white;
+  padding:7px 10px;
+  border-radius:5px;
+  box-shadow:0 1px 5px #0002;
+  font-size:11px;
+}
+.kpi-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.kpi{
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:10px;
+  background:#fbfcfe;
+}
+.kpi .name{
+  color:var(--muted);
+  font-size:10px;
+  margin-bottom:6px;
+}
+.kpi .value{
+  font-size:20px;
+  font-weight:bold;
+  color:#174f7a;
+  overflow-wrap:anywhere;
+}
+.kpi .unit{font-size:10px;color:var(--muted)}
+.chart-box{
+  height:210px;
+  margin:10px 0 18px;
+  position:relative;
+}
+.chart-box canvas{max-height:210px}
+.log{
+  background:#101e2c;
+  color:#b9e7d6;
+  padding:10px;
+  height:145px;
+  overflow:auto;
+  border-radius:5px;
+  font-family:Consolas,monospace;
+  font-size:10px;
+  line-height:1.6;
+  white-space:pre-wrap;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:11px;
+  margin:7px 0;
+}
+.dot{
+  width:11px;height:11px;border-radius:50%;display:inline-block;
+}
+footer{
+  background:#10243a;
+  color:#d7e7f4;
+  padding:15px;
+  margin-top:14px;
+  text-align:center;
+  font-size:11px;
+  line-height:1.8;
+}
+footer strong{color:#7de0dd}
+.notice{
+  padding:9px;
+  border-radius:5px;
+  background:#fff8e8;
+  border:1px solid #f0dfb4;
+  font-size:10px;
+  line-height:1.5;
+  color:#6e5725;
+}
+.source-list{
+  font-size:10px;
+  line-height:1.7;
+  color:#596b7c;
+}
+.source-list a{color:#1769aa}
+.small-stat{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid #edf0f4;
+  font-size:11px;
+}
+.progress{
+  height:6px;
+  background:#e5ebf0;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:6px;
+}
+.progress div{
+  height:100%;
+  width:0%;
+  background:var(--cyan);
+  transition:width .3s;
+}
+.leaflet-popup-content{font-size:12px;line-height:1.6}
+@media(max-width:1100px){
+  .dashboard{grid-template-columns:1fr 1fr}
+  .map-panel{grid-column:1/-1;grid-row:1}
+  #map{height:570px;min-height:450px}
+  .side-scroll{height:auto;min-height:0;max-height:650px}
+}
+@media(max-width:700px){
+  main{padding:8px}
+  .dashboard{grid-template-columns:1fr}
+  .map-panel{grid-column:auto;grid-row:auto}
+  #map{height:480px;min-height:400px}
+  .side-scroll{max-height:none}
+  header h1{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="brand">GBoS GEOAI • SILKYSINGZ GEOAI</div>
+      <h1>Gambia Greenhouse & Rural Building Detection Intelligence</h1>
+      <p>Online geospatial data discovery • Building footprints • Satellite imagery • Spatial analytics</p>
+    </div>
+    <div class="status" id="connectionStatus">ONLINE DATA READY</div>
+  </div>
+</header>
+
+<main>
+
+<div class="toolbar">
+  <button class="primary" id="loadAllBtn">
+    <i class="fa-solid fa-cloud-arrow-down"></i> Fetch Gambia Data
+  </button>
+  <button class="secondary" id="loadBuildingsBtn">Fetch Buildings</button>
+  <button class="secondary" id="loadRoadsBtn">Fetch Roads</button>
+  <button class="secondary" id="loadBoundariesBtn">Fetch Boundaries</button>
+  <button class="success" id="exportGeoJSONBtn">Export GeoJSON</button>
+  <button class="success" id="exportCSVBtn">Export CSV</button>
+  <button class="warning" id="resetBtn">Reset Dashboard</button>
+</div>
+
+<div class="dashboard">
+
+<!-- CONTROLS -->
+<section class="panel">
+  <div class="panel-heading">
+    <i class="fa-solid fa-sliders"></i> Controls & Data Sources
+  </div>
+  <div class="panel-body side-scroll">
+
+    <div class="section">
+      <h3>Online data services</h3>
+      <div class="field">
+        <label>Overpass API endpoint</label>
+        <select id="overpassEndpoint">
+          <option value="https://overpass-api.de/api/interpreter">Overpass API Germany</option>
+          <option value="https://overpass.kumi.systems/api/interpreter">Overpass Kumi</option>
+          <option value="https://overpass.nchc.org.tw/api/interpreter">Overpass Taiwan</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Building query scope</label>
+        <select id="buildingScope">
+          <option value="national">National Gambia query</option>
+          <option value="visible">Current map extent</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Road query scope</label>
+        <select id="roadScope">
+          <option value="national">National Gambia query</option>
+          <option value="visible">Current map extent</option>
+        </select>
+      </div>
+      <div class="help">
+        Overpass retrieves features currently mapped in OpenStreetMap. National requests may take time or be limited by the service.
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Map layers</h3>
+      <label class="check-row"><input type="checkbox" id="showBuildings" checked> OSM building footprints</label>
+      <label class="check-row"><input type="checkbox" id="showRoads" checked> OSM roads</label>
+      <label class="check-row"><input type="checkbox" id="showBoundaries" checked> Administrative boundaries</label>
+      <label class="check-row"><input type="checkbox" id="showDetections" checked> Imported detections</label>
+      <label class="check-row"><input type="checkbox" id="showImage" checked> Uploaded image overlay</label>
+    </div>
+
+    <div class="section">
+      <h3>Basemap</h3>
+      <div class="field">
+        <select id="basemap">
+          <option value="satellite">Esri Satellite</option>
+          <option value="street">OpenStreetMap</option>
+          <option value="terrain">Esri Terrain</option>
+          <option value="hybrid">Satellite + labels</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Administrative filtering</h3>
+      <div class="field">
+        <label>Administrative level</label>
+        <select id="adminLevel">
+          <option value="ADM1">Region / ADM1</option>
+          <option value="ADM2">District / ADM2</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Administrative area</label>
+        <select id="adminFilter">
+          <option value="">All Gambia</option>
+        </select>
+      </div>
+      <div class="help">
+        Filtering is based on the loaded administrative boundary data. A boundary source may use different administrative naming conventions.
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Detection data</h3>
+      <div class="field">
+        <label>Upload detection results (GeoJSON, JSON or CSV)</label>
+        <input type="file" id="detectionFile" accept=".geojson,.json,.csv">
+      </div>
+      <div class="field">
+        <label>Confidence threshold</label>
+        <input type="range" id="confidence" min="0" max="100" value="0" style="width:100%">
+        <div class="help"><span id="confidenceLabel">0%</span> minimum confidence</div>
+      </div>
+      <div class="field">
+        <label>Detection class</label>
+        <select id="classFilter">
+          <option value="">All classes</option>
+        </select>
+      </div>
+      <div class="notice">
+        This interface displays imported detections. It does not run YOLOv8 or EW-YOLOv8 inference in the browser.
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Satellite imagery upload</h3>
+      <div class="field">
+        <label>Upload JPG, PNG or WebP</label>
+        <input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp">
+      </div>
+      <div class="field">
+        <label>Image opacity</label>
+        <input type="range" id="imageOpacity" min="0" max="100" value="70" style="width:100%">
+      </div>
+      <p class="help">For map placement, enter the image's geographic bounds. This feature does not automatically georeference an ordinary image.</p>
+      <div class="field">
+        <label>West longitude</label>
+        <input type="number" id="west" step="0.0001" value="-16.9">
+      </div>
+      <div class="field">
+        <label>South latitude</label>
+        <input type="number" id="south" step="0.0001" value="13.0">
+      </div>
+      <div class="field">
+        <label>East longitude</label>
+        <input type="number" id="east" step="0.0001" value="-13.7">
+      </div>
+      <div class="field">
+        <label>North latitude</label>
+        <input type="number" id="north" step="0.0001" value="13.9">
+      </div>
+      <button class="primary" id="placeImageBtn">Place Image on Map</button>
+    </div>
+
+    <div class="section">
+      <h3>Data retrieval progress</h3>
+      <div id="progressText" class="help">Waiting for data request.</div>
+      <div class="progress"><div id="progressBar"></div></div>
+      <div id="log" class="log">GBoS GEOAI system initialised.
+Waiting for user request...</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="panel map-panel">
+  <div class="panel-heading">
+    <i class="fa-solid fa-map-location-dot"></i> Interactive Geospatial Map
+  </div>
+  <div class="map-wrap">
+    <div class="map-label">The Gambia • WGS84</div>
+    <div id="map"></div>
+  </div>
+</section>
+
+<!-- ANALYTICS -->
+<section class="panel">
+  <div class="panel-heading">
+    <i class="fa-solid fa-chart-column"></i> Spatial Analytics
+  </div>
+  <div class="panel-body side-scroll">
+
+    <div class="section">
+      <h3>National data indicators</h3>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="name">Mapped buildings</div>
+          <div class="value" id="buildingCount">0</div>
+          <div class="unit">OSM features</div>
+        </div>
+        <div class="kpi">
+          <div class="name">Mapped roads</div>
+          <div class="value" id="roadCount">0</div>
+          <div class="unit">OSM features</div>
+        </div>
+        <div class="kpi">
+          <div class="name">Imported detections</div>
+          <div class="value" id="detectionCount">0</div>
+          <div class="unit">Uploaded records</div>
+        </div>
+        <div class="kpi">
+          <div class="name">Mean confidence</div>
+          <div class="value" id="meanConfidence">N/A</div>
+          <div class="unit">Imported confidence values</div>
+        </div>
+        <div class="kpi">
+          <div class="name">Greenhouse labels</div>
+          <div class="value" id="greenhouseCount">0</div>
+          <div class="unit">Imported detections only</div>
+        </div>
+        <div class="kpi">
+          <div class="name">Rural building labels</div>
+          <div class="value" id="ruralCount">0</div>
+          <div class="unit">Imported detections only</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Building classification</h3>
+      <div class="chart-box"><canvas id="buildingChart"></canvas></div>
+    </div>
+
+    <div class="section">
+      <h3>Imported detection classes</h3>
+      <div class="chart-box"><canvas id="detectionChart"></canvas></div>
+    </div>
+
+    <div class="section">
+      <h3>Confidence distribution</h3>
+      <div class="chart-box"><canvas id="confidenceChart"></canvas></div>
+    </div>
+
+    <div class="section">
+      <h3>Spatial summary</h3>
+      <div class="small-stat"><span>Boundary features</span><strong id="boundaryCount">0</strong></div>
+      <div class="small-stat"><span>Filtered buildings</span><strong id="filteredBuildingCount">0</strong></div>
+      <div class="small-stat"><span>Filtered detections</span><strong id="filteredDetectionCount">0</strong></div>
+      <div class="small-stat"><span>Features with confidence</span><strong id="confidenceCount">0</strong></div>
+      <div class="small-stat"><span>Unknown detection classes</span><strong id="unknownCount">0</strong></div>
+    </div>
+
+    <div class="section">
+      <h3>Map legend</h3>
+      <div class="legend-item"><span class="dot" style="background:#2679c5"></span> OSM building footprints</div>
+      <div class="legend-item"><span class="dot" style="background:#e18b37"></span> OSM road network</div>
+      <div class="legend-item"><span class="dot" style="background:#8d58ba"></span> Greenhouse-labelled detection</div>
+      <div class="legend-item"><span class="dot" style="background:#2caa79"></span> Rural-building-labelled detection</div>
+      <div class="legend-item"><span class="dot" style="background:#d9534f"></span> Other detection classes</div>
+      <div class="legend-item"><span style="width:18px;height:3px;background:#f0d24b;display:inline-block"></span> Administrative boundary</div>
+    </div>
+
+    <div class="section">
+      <h3>Methodology and interpretation</h3>
+      <div class="help">
+        <strong>Online building inventory:</strong> retrieves building objects tagged in OpenStreetMap. Completeness varies by location and contributor activity.
+        <br><br>
+        <strong>Administrative analysis:</strong> uses downloaded boundary geometries where available.
+        <br><br>
+        <strong>Detection analysis:</strong> imported model output is analysed by class and confidence. A greenhouse label is only reported when it exists in the imported data.
+        <br><br>
+        <strong>EW-YOLOv8 context:</strong> the referenced research combines DySample, Normalized Wasserstein Distance (NWD) and Slide classification weighting. This HTML dashboard does not implement or reproduce the model.
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Online data sources</h3>
+      <div class="source-list">
+        • <a href="https://www.openstreetmap.org/" target="_blank">OpenStreetMap</a> — mapped buildings and roads.
+        <br>
+        • <a href="https://overpass-api.de/" target="_blank">Overpass API</a> — OpenStreetMap feature queries.
+        <br>
+        • <a href="https://www.geoboundaries.org/" target="_blank">geoBoundaries</a> — administrative boundary data.
+        <br>
+        • <a href="https://www.esri.com/en-us/arcgis/products/arcgis-world-imagery" target="_blank">Esri World Imagery</a> — satellite basemap.
+        <br>
+        • <a href="https://esa-worldcover.org/" target="_blank">ESA WorldCover</a> — land-cover reference.
+        <br>
+        • <a href="https://sites.research.google/open-buildings/" target="_blank">Google Open Buildings</a> — separate building-footprint dataset; not queried directly by this browser application.
+        <br>
+        • <a href="https://www.overturemaps.org/" target="_blank">Overture Maps</a> — additional global mapping data.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <strong>GBoS GEOAI • SILKYSINGZ GEOAI</strong><br>
+  Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+  Research and educational use • Data quality and completeness depend on source providers
+</footer>
+
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/@turf/turf@7.2.0/turf.min.js"></script>
+
+<script>
+"use strict";
+
+/* =========================================================
+   GBoS GEOAI
+   Gambia Greenhouse & Rural Building Detection Intelligence
+   Online data retrieval and spatial analysis
+   ========================================================= */
+
+const GAMBIA_BBOX = {
+  south: 13.0,
+  west: -16.9,
+  north: 13.9,
+  east: -13.7
+};
+
+const state = {
+  buildings: [],
+  roads: [],
+  boundaries: [],
+  detections: [],
+  imageOverlay: null,
+  imageURL: null,
+  buildingLayer: null,
+  roadLayer: null,
+  boundaryLayer: null,
+  detectionLayer: null,
+  currentBasemap: null,
+  charts: {},
+  requestRunning: false
+};
+
+const $ = id => document.getElementById(id);
+
+function log(message, type="info"){
+  const box = $("log");
+  const time = new Date().toLocaleTimeString();
+  const prefix = type === "error" ? "[ERROR]" :
+                 type === "success" ? "[SUCCESS]" : "[INFO]";
+  box.textContent += `\n${time} ${prefix} ${message}`;
+  box.scrollTop = box.scrollHeight;
+}
+
+function setStatus(message){
+  $("connectionStatus").textContent = message;
+}
+
+function setProgress(value,message){
+  $("progressBar").style.width = Math.max(0,Math.min(100,value)) + "%";
+  $("progressText").textContent = message;
+}
+
+function formatNumber(value){
+  return Number(value || 0).toLocaleString();
+}
+
+function safeText(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[ch]));
+}
+
+/* MAP INITIALISATION */
+
+const map = L.map("map",{
+  center:[13.45,-15.5],
+  zoom:8,
+  preferCanvas:true
+});
+
+const basemaps = {
+  satellite:L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19,attribution:"Imagery © Esri"}
+  ),
+  street:L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {maxZoom:19,attribution:"© OpenStreetMap contributors"}
+  ),
+  terrain:L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19,attribution:"Tiles © Esri"}
+  )
+};
+
+const hybridLabels = L.tileLayer(
+  "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19,opacity:0.85,attribution:"Labels © Esri"}
+);
+
+function setBasemap(name){
+  Object.values(basemaps).forEach(layer=>{
+    if(map.hasLayer(layer)) map.removeLayer(layer);
+  });
+  if(map.hasLayer(hybridLabels)) map.removeLayer(hybridLabels);
+
+  const selected = name === "hybrid" ? "satellite" : name;
+  (basemaps[selected] || basemaps.satellite).addTo(map);
+
+  if(name === "hybrid") hybridLabels.addTo(map);
+  state.currentBasemap = name;
+}
+
+setBasemap("satellite");
+
+/* FEATURE GROUPS */
+
+state.buildingLayer = L.geoJSON(null,{
+  style:()=>({
+    color:"#2679c5",
+    weight:1,
+    fillColor:"#2679c5",
+    fillOpacity:0.45
+  }),
+  pointToLayer:(feature,latlng)=>L.circleMarker(latlng,{
+    radius:4,color:"#2679c5",fillOpacity:.75
+  }),
+  onEachFeature:(feature,layer)=>{
+    layer.bindPopup(popupFor(feature,"OpenStreetMap building"));
+  }
+});
+
+state.roadLayer = L.geoJSON(null,{
+  style:()=>({color:"#e18b37",weight:1.5,opacity:.8}),
+  onEachFeature:(feature,layer)=>{
+    layer.bindPopup(popupFor(feature,"OpenStreetMap road"));
+  }
+});
+
+state.boundaryLayer = L.geoJSON(null,{
+  style:()=>({
+    color:"#f0d24b",
+    weight:2,
+    fillColor:"#f0d24b",
+    fillOpacity:.03
+  }),
+  onEachFeature:(feature,layer)=>{
+    layer.bindPopup(popupFor(feature,"Administrative boundary"));
+  }
+});
+
+state.detectionLayer = L.geoJSON(null,{
+  style:feature=>{
+    const c = classColor(getClass(feature.properties || {}));
+    return {color:c,weight:2,fillColor:c,fillOpacity:.35};
+  },
+  pointToLayer:(feature,latlng)=>{
+    const c=classColor(getClass(feature.properties || {}));
+    return L.circleMarker(latlng,{
+      radius:6,color:c,fillColor:c,fillOpacity:.85,weight:1
+    });
+  },
+  onEachFeature:(feature,layer)=>{
+    layer.bindPopup(popupFor(feature,"Imported detection"));
+  }
+});
+
+function popupFor(feature,title){
+  const p=feature.properties || {};
+  const rows=Object.entries(p).slice(0,12).map(([k,v])=>
+    `<div><strong>${safeText(k)}:</strong> ${safeText(v)}</div>`
+  ).join("");
+  return `<strong>${safeText(title)}</strong><hr>${rows || "No attributes"}`;
+}
+
+function refreshLayers(){
+  const controls = [
+    ["showBuildings",state.buildingLayer],
+    ["showRoads",state.roadLayer],
+    ["showBoundaries",state.boundaryLayer],
+    ["showDetections",state.detectionLayer]
+  ];
+  controls.forEach(([id,layer])=>{
+    if($(id).checked){
+      if(!map.hasLayer(layer)) layer.addTo(map);
+    }else{
+      if(map.hasLayer(layer)) map.removeLayer(layer);
+    }
+  });
+
+  if(state.imageOverlay && $("showImage").checked){
+    if(!map.hasLayer(state.imageOverlay)) state.imageOverlay.addTo(map);
+  }else if(state.imageOverlay && map.hasLayer(state.imageOverlay)){
+    map.removeLayer(state.imageOverlay);
+  }
+}
+
+function classColor(label){
+  const s=String(label || "").toLowerCase();
+  if(s.includes("greenhouse")) return "#8d58ba";
+  if(s.includes("rural") || s.includes("building")) return "#2caa79";
+  return "#d9534f";
+}
+
+function getClass(properties){
+  const p=properties || {};
+  return p.class || p.class_name || p.label || p.category ||
+         p.type || p.predicted_class || "Unknown";
+}
+
+/* NETWORK HELPERS */
+
+async function fetchJSON(url,options={},timeout=120000){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
+  try{
+    const response=await fetch(url,{
+      ...options,
+      signal:controller.signal
+    });
+    if(!response.ok){
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return await response.json();
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+function getCurrentBBox(scope){
+  if(scope==="visible"){
+    const b=map.getBounds();
+    return {
+      south:b.getSouth(),
+      west:b.getWest(),
+      north:b.getNorth(),
+      east:b.getEast()
+    };
+  }
+  return GAMBIA_BBOX;
+}
+
+function bboxString(b){
+  return `${b.south},${b.west},${b.north},${b.east}`;
+}
+
+/* OVERPASS API */
+
+async function overpassRequest(query){
+  const endpoint=$("overpassEndpoint").value;
+  const response=await fetch(endpoint,{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+    body:"data="+encodeURIComponent(query)
+  });
+
+  if(!response.ok){
+    throw new Error(`Overpass returned HTTP ${response.status}`);
+  }
+  return await response.json();
+}
+
+function overpassToGeoJSON(data){
+  const features=[];
+  const nodes=new Map();
+
+  (data.elements || []).forEach(el=>{
+    if(el.type==="node" && Number.isFinite(el.lat) && Number.isFinite(el.lon)){
+      nodes.set(el.id,[el.lon,el.lat]);
+    }
+  });
+
+  (data.elements || []).forEach(el=>{
+    const tags=el.tags || {};
+    let geometry=null;
+
+    if(el.type==="node" && Number.isFinite(el.lat)){
+      geometry={
+        type:"Point",
+        coordinates:[el.lon,el.lat]
+      };
+    }
+
+    if(el.type==="way" && Array.isArray(el.geometry)){
+      const coords=el.geometry
+        .filter(p=>Number.isFinite(p.lon) && Number.isFinite(p.lat))
+        .map(p=>[p.lon,p.lat]);
+
+      if(coords.length>=2){
+        const closed=coords.length>=4 &&
+          coords[0][0]===coords[coords.length-1][0] &&
+          coords[0][1]===coords[coords.length-1][1];
+
+        const isBuilding=Boolean(tags.building);
+        if(isBuilding && closed && coords.length>=4){
+          geometry={type:"Polygon",coordinates:[coords]};
+        }else{
+          geometry={type:"LineString",coordinates:coords};
+        }
+      }
+    }
+
+    if(!geometry) return;
+
+    features.push({
+      type:"Feature",
+      id:`osm-${el.type}-${el.id}`,
+      geometry,
+      properties:{
+        ...tags,
+        osm_id:el.id,
+        osm_type:el.type,
+        source:"OpenStreetMap"
+      }
+    });
+  });
+
+  return {type:"FeatureCollection",features};
+}
+
+function osmAreaQuery(bbox,selector){
+  const b=bboxString(bbox);
+  return `
+[out:json][timeout:90];
+(
+  ${selector}(if: true)(${b});
+);
+out body geom;
+`;
+}
+
+async function loadBuildings(){
+  log("Requesting mapped buildings from OpenStreetMap...");
+  setProgress(10,"Fetching OSM buildings...");
+  setStatus("FETCHING BUILDINGS");
+
+  const bbox=getCurrentBBox($("buildingScope").value);
+  const b=bboxString(bbox);
+  const query=`
+[out:json][timeout:120];
+(
+  way["building"](${b});
+  relation["building"](${b});
+);
+out body geom;
+`;
+
+  const data=await overpassRequest(query);
+  const collection=overpassToGeoJSON(data);
+
+  state.buildings=collection.features.filter(f=>{
+    return f.geometry && f.properties && f.properties.building;
+  });
+
+  state.buildingLayer.clearLayers();
+  state.buildingLayer.addData({
+    type:"FeatureCollection",
+    features:state.buildings
+  });
+
+  log(`Retrieved ${state.buildings.length.toLocaleString()} OSM building features.`,"success");
+  setProgress(100,"Building retrieval complete.");
+  refreshLayers();
+  updateAnalytics();
+  setStatus("BUILDINGS LOADED");
+}
+
+async function loadRoads(){
+  log("Requesting mapped roads from OpenStreetMap...");
+  setProgress(10,"Fetching OSM roads...");
+  setStatus("FETCHING ROADS");
+
+  const bbox=getCurrentBBox($("roadScope").value);
+  const b=bboxString(bbox);
+  const query=`
+[out:json][timeout:120];
+(
+  way["highway"](${b});
+);
+out body geom;
+`;
+
+  const data=await overpassRequest(query);
+  const collection=overpassToGeoJSON(data);
+
+  state.roads=collection.features.filter(f=>
+    f.geometry && f.geometry.type==="LineString"
+  );
+
+  state.roadLayer.clearLayers();
+  state.roadLayer.addData({
+    type:"FeatureCollection",
+    features:state.roads
+  });
+
+  log(`Retrieved ${state.roads.length.toLocaleString()} OSM road features.`,"success");
+  setProgress(100,"Road retrieval complete.");
+  refreshLayers();
+  updateAnalytics();
+  setStatus("ROADS LOADED");
+}
+
+/* ADMINISTRATIVE BOUNDARIES */
+
+async function loadBoundaries(){
+  log("Requesting Gambia administrative boundaries from geoBoundaries...");
+  setProgress(15,"Connecting to geoBoundaries...");
+  setStatus("FETCHING BOUNDARIES");
+
+  const level=$("adminLevel").value;
+  const apiURL=`https://www.geoboundaries.org/api/current/gbOpen/GMB/${level}/`;
+
+  const metadata=await fetchJSON(apiURL,{},60000);
+
+  const downloadURL=metadata.gjDownloadURL ||
+                    metadata.geojson ||
+                    metadata.downloadURL;
+
+  if(!downloadURL){
+    throw new Error("geoBoundaries did not return a GeoJSON download URL.");
+  }
+
+  setProgress(55,"Downloading boundary GeoJSON...");
+  const geojson=await fetchJSON(downloadURL,{},120000);
+
+  if(!geojson || !Array.isArray(geojson.features)){
+    throw new Error("Boundary response is not a GeoJSON FeatureCollection.");
+  }
+
+  state.boundaries=geojson.features.map(f=>({
+    ...f,
+    properties:{
+      ...(f.properties || {}),
+      source:"geoBoundaries",
+      boundary_level:level
+    }
+  }));
+
+  state.boundaryLayer.clearLayers();
+  state.boundaryLayer.addData({
+    type:"FeatureCollection",
+    features:state.boundaries
+  });
+
+  populateAdminFilter();
+
+  log(`Loaded ${state.boundaries.length} administrative boundary features (${level}).`,"success");
+  setProgress(100,"Boundary download complete.");
+  refreshLayers();
+  updateAnalytics();
+  setStatus("BOUNDARIES LOADED");
+}
+
+function getAdminName(feature){
+  const p=feature.properties || {};
+  return p.shapeName || p.shapeName_en || p.name ||
+         p.NAME_1 || p.NAME_2 || p.admin || p.ADM1_EN ||
+         p.ADM2_EN || p.NAME || "Unnamed area";
+}
+
+function populateAdminFilter(){
+  const select=$("adminFilter");
+  select.innerHTML='<option value="">All Gambia</option>';
+
+  const names=[...new Set(state.boundaries.map(getAdminName))].sort();
+  names.forEach(name=>{
+    const option=document.createElement("option");
+    option.value=name;
+    option.textContent=name;
+    select.appendChild(option);
+  });
+}
+
+/* ONLINE RETRIEVAL */
+
+async function runTask(name,fn){
+  if(state.requestRunning){
+    log("Another online request is already running. Please wait.","error");
+    return;
+  }
+
+  state.requestRunning=true;
+  try{
+    await fn();
+  }catch(error){
+    console.error(error);
+    log(`${name}: ${error.message}`,"error");
+    setStatus("REQUEST FAILED");
+    setProgress(0,`${name} failed. Check the log.`);
+    alert(`${name} failed:\n${error.message}\n\nTry another Overpass endpoint or retry later.`);
+  }finally{
+    state.requestRunning=false;
+  }
+}
+
+async function loadAll(){
+  if(state.requestRunning) return;
+  state.requestRunning=true;
+  setStatus("LOADING DATA");
+
+  const tasks=[
+    ["Administrative boundaries",loadBoundaries],
+    ["Building footprints",loadBuildings],
+    ["Road network",loadRoads]
+  ];
+
+  let completed=0;
+  for(const [name,fn] of tasks){
+    try{
+      log(`Starting ${name}...`);
+      await fn();
+    }catch(error){
+      log(`${name} failed: ${error.message}`,"error");
+    }
+    completed++;
+    setProgress(completed/tasks.length*100,`${completed} of ${tasks.length} online data tasks completed.`);
+  }
+
+  state.requestRunning=false;
+  setStatus("DATA FETCH FINISHED");
+  updateAnalytics();
+}
+
+$("loadAllBtn").addEventListener("click",loadAll);
+$("loadBuildingsBtn").addEventListener("click",()=>runTask("Building retrieval",loadBuildings));
+$("loadRoadsBtn").addEventListener("click",()=>runTask("Road retrieval",loadRoads));
+$("loadBoundariesBtn").addEventListener("click",()=>runTask("Boundary retrieval",loadBoundaries));
+
+/* DETECTION IMPORT */
+
+function normaliseProperties(p){
+  const result={...(p || {})};
+  const lower={};
+
+  Object.keys(result).forEach(k=>{
+    lower[k.toLowerCase().trim()]=result[k];
+  });
+
+  const first=keys=>{
+    for(const k of keys){
+      if(lower[k]!==undefined && lower[k]!==null && lower[k]!==""){
+        return lower[k];
+      }
+    }
+    return null;
+  };
+
+  result.class=first(["class","class_name","label","category","type","predicted_class"]) || "Unknown";
+
+  const confidence=first(["confidence","conf","score","probability"]);
+  if(confidence!==null){
+    let n=Number(confidence);
+    if(Number.isFinite(n)){
+      if(n>1 && n<=100) n=n/100;
+      result.confidence=Math.max(0,Math.min(1,n));
+    }
+  }
+
+  result.id=result.id || first(["object_id","detection_id","fid"]) || "";
+  return result;
+}
+
+function parseCSV(text){
+  const rows=[];
+  let row=[],field="",quoted=false;
+
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"'){
+      if(quoted && text[i+1]==='"'){
+        field+='"';i++;
+      }else{
+        quoted=!quoted;
+      }
+    }else if(c==="," && !quoted){
+      row.push(field);field="";
+    }else if((c==="\n" || c==="\r") && !quoted){
+      if(c==="\r" && text[i+1]==="\n") i++;
+      row.push(field);field="";
+      if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+      row=[];
+    }else{
+      field+=c;
+    }
+  }
+  row.push(field);
+  if(row.some(v=>String(v).trim()!=="")) rows.push(row);
+
+  if(rows.length<2) throw new Error("CSV file has no data rows.");
+
+  const headers=rows[0].map(h=>h.trim().toLowerCase());
+  const findIndex=names=>headers.findIndex(h=>names.includes(h));
+
+  const lonI=findIndex(["longitude","lon","lng","x"]);
+  const latI=findIndex(["latitude","lat","y"]);
+
+  if(lonI<0 || latI<0){
+    throw new Error("CSV requires longitude/lon/lng/x and latitude/lat/y columns.");
+  }
+
+  return rows.slice(1).map((r,i)=>{
+    const lon=Number(r[lonI]);
+    const lat=Number(r[latI]);
+
+    if(!Number.isFinite(lon)||!Number.isFinite(lat)||
+       lon < -180 || lon > 180 || lat < -90 || lat > 90) return null;
+
+    const p={};
+    headers.forEach((h,j)=>p[h]=r[j] ?? "");
+    p.source="Imported detection CSV";
+    const properties=normaliseProperties(p);
+    properties.record_number=i+1;
+
+    return {
+      type:"Feature",
+      id:`import-${i+1}`,
+      geometry:{type:"Point",coordinates:[lon,lat]},
+      properties
+    };
+  }).filter(Boolean);
+}
+
+function validateGeoJSON(data){
+  let features=[];
+
+  if(data.type==="FeatureCollection" && Array.isArray(data.features)){
+    features=data.features;
+  }else if(data.type==="Feature"){
+    features=[data];
+  }else if(data.type && data.coordinates){
+    features=[{
+      type:"Feature",
+      geometry:data,
+      properties:{}
+    }];
+  }else{
+    throw new Error("Unsupported GeoJSON structure.");
+  }
+
+  return features.filter(f=>f.geometry).map((f,i)=>({
+    ...f,
+    id:f.id || `import-${i+1}`,
+    properties:normaliseProperties(f.properties || {})
+  }));
+}
+
+$("detectionFile").addEventListener("change",async event=>{
+  const file=event.target.files[0];
+  if(!file) return;
+
+  try{
+    const text=await file.text();
+    let features;
+
+    if(file.name.toLowerCase().endsWith(".csv")){
+      features=parseCSV(text);
+    }else{
+      features=validateGeoJSON(JSON.parse(text));
+    }
+
+    state.detections=features;
+    log(`Imported ${features.length} detection features from ${file.name}.`,"success");
+    refreshDetectionFilter();
+    updateDetectionLayer();
+    updateAnalytics();
+  }catch(error){
+    log(`Detection import failed: ${error.message}`,"error");
+    alert("Could not load detection data:\n"+error.message);
+  }
+});
+
+function refreshDetectionFilter(){
+  const select=$("classFilter");
+  const current=select.value;
+  const classes=[...new Set(state.detections.map(f=>getClass(f.properties)))].sort();
+
+  select.innerHTML='<option value="">All classes</option>';
+  classes.forEach(c=>{
+    const option=document.createElement("option");
+    option.value=c;
+    option.textContent=c;
+    select.appendChild(option);
+  });
+
+  if(classes.includes(current)) select.value=current;
+}
+
+function featureConfidence(feature){
+  const value=feature.properties?.confidence;
+  return Number.isFinite(Number(value)) && value!=="" ? Number(value) : null;
+}
+
+function getFilteredDetections(){
+  const threshold=Number($("confidence").value)/100;
+  const selectedClass=$("classFilter").value;
+
+  return state.detections.filter(f=>{
+    const cls=getClass(f.properties);
+    const conf=featureConfidence(f);
+
+    if(selectedClass && cls!==selectedClass) return false;
+    if(conf!==null && conf<threshold) return false;
+    return true;
+  });
+}
+
+function updateDetectionLayer(){
+  state.detectionLayer.clearLayers();
+  state.detectionLayer.addData({
+    type:"FeatureCollection",
+    features:getFilteredDetections()
+  });
+  refreshLayers();
+}
+
+/* IMAGE UPLOAD AND MAP OVERLAY */
+
+$("imageFile").addEventListener("change",event=>{
+  const file=event.target.files[0];
+  if(!file) return;
+
+  if(state.imageURL) URL.revokeObjectURL(state.imageURL);
+  state.imageURL=URL.createObjectURL(file);
+
+  log(`Loaded local image ${file.name}. Set its geographic bounds and place it on the map.`);
+});
+
+$("placeImageBtn").addEventListener("click",()=>{
+  if(!state.imageURL){
+    alert("Upload a satellite image first.");
+    return;
+  }
+
+  const west=Number($("west").value);
+  const south=Number($("south").value);
+  const east=Number($("east").value);
+  const north=Number($("north").value);
+
+  if(!(west<east && south<north)){
+    alert("Please enter valid image bounds.");
+    return;
+  }
+
+  if(state.imageOverlay) map.removeLayer(state.imageOverlay);
+
+  state.imageOverlay=L.imageOverlay(
+    state.imageURL,
+    [[south,west],[north,east]],
+    {opacity:Number($("imageOpacity").value)/100}
+  );
+
+  refreshLayers();
+  map.fitBounds([[south,west],[north,east]]);
+  log("Image overlay placed using the entered geographic bounds.","success");
+});
+
+$("imageOpacity").addEventListener("input",()=>{
+  if(state.imageOverlay){
+    state.imageOverlay.setOpacity(Number($("imageOpacity").value)/100);
+  }
+});
+
+/* ADMINISTRATIVE FILTER */
+
+function pointInsideArea(feature,area){
+  if(!area || !area.geometry || !feature.geometry) return true;
+
+  try{
+    let point;
+    if(feature.geometry.type==="Point"){
+      point=turf.point(feature.geometry.coordinates);
+    }else{
+      point=turf.centroid(feature);
+    }
+    return turf.booleanPointInPolygon(point,area);
+  }catch(e){
+    return true;
+  }
+}
+
+function selectedAreaFeature(){
+  const name=$("adminFilter").value;
+  if(!name) return null;
+  return state.boundaries.find(f=>getAdminName(f)===name) || null;
+}
+
+function getFilteredBuildings(){
+  const area=selectedAreaFeature();
+  if(!area) return state.buildings;
+  return state.buildings.filter(f=>pointInsideArea(f,area));
+}
+
+function getFilteredRoads(){
+  const area=selectedAreaFeature();
+  if(!area) return state.roads;
+  return state.roads.filter(f=>pointInsideArea(f,area));
+}
+
+/* ANALYTICS AND CHARTS */
+
+function createOrUpdateChart(id,type,labels,data,label){
+  const canvas=$(id);
+  if(!state.charts[id]){
+    state.charts[id]=new Chart(canvas,{
+      type,
+      data:{
+        labels,
+        datasets:[{
+          label,
+          data,
+          borderWidth:1,
+          backgroundColor:[
+            "#2679c5","#2caa79","#8d58ba","#e18b37",
+            "#d9534f","#16a6b6","#8b9bad","#d6b94d"
+          ]
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{legend:{display:type!=="bar",position:"bottom"}},
+        scales:type==="bar"?{
+          y:{beginAtZero:true,ticks:{precision:0}}
+        }:{}
+      }
+    });
+  }else{
+    const chart=state.charts[id];
+    chart.data.labels=labels;
+    chart.data.datasets[0].data=data;
+    chart.update();
+  }
+}
+
+function updateAnalytics(){
+  const buildings=getFilteredBuildings();
+  const roads=getFilteredRoads();
+  const detections=getFilteredDetections();
+
+  const classes={};
+  buildings.forEach(f=>{
+    const c=f.properties?.building || "building";
+    classes[c]=(classes[c] || 0)+1;
+  });
+
+  const detectionClasses={};
+  detections.forEach(f=>{
+    const c=getClass(f.properties);
+    detectionClasses[c]=(detectionClasses[c] || 0)+1;
+  });
+
+  const confidenceValues=detections
+    .map(featureConfidence)
+    .filter(v=>v!==null);
+
+  const mean=confidenceValues.length
+    ? confidenceValues.reduce((a,b)=>a+b,0)/confidenceValues.length
+    : null;
+
+  const greenhouse=detections.filter(f=>
+    String(getClass(f.properties)).toLowerCase().includes("greenhouse")
+  ).length;
+
+  const rural=detections.filter(f=>{
+    const c=String(getClass(f.properties)).toLowerCase();
+    return c.includes("rural") || c==="building" || c==="buildings";
+  }).length;
+
+  const unknown=detections.filter(f=>
+    String(getClass(f.properties)).toLowerCase()==="unknown"
+  ).length;
+
+  $("buildingCount").textContent=formatNumber(state.buildings.length);
+  $("roadCount").textContent=formatNumber(state.roads.length);
+  $("detectionCount").textContent=formatNumber(state.detections.length);
+  $("meanConfidence").textContent=mean===null?"N/A":(mean*100).toFixed(1)+"%";
+  $("greenhouseCount").textContent=formatNumber(greenhouse);
+  $("ruralCount").textContent=formatNumber(rural);
+  $("boundaryCount").textContent=formatNumber(state.boundaries.length);
+  $("filteredBuildingCount").textContent=formatNumber(buildings.length);
+  $("filteredDetectionCount").textContent=formatNumber(detections.length);
+  $("confidenceCount").textContent=formatNumber(confidenceValues.length);
+  $("unknownCount").textContent=formatNumber(unknown);
+
+  createOrUpdateChart(
+    "buildingChart","doughnut",
+    Object.keys(classes),Object.values(classes),"OSM building tags"
+  );
+
+  createOrUpdateChart(
+    "detectionChart","doughnut",
+    Object.keys(detectionClasses),Object.values(detectionClasses),"Detection classes"
+  );
+
+  const bins=[0,0,0,0,0];
+  confidenceValues.forEach(v=>{
+    const i=Math.min(4,Math.floor(v*5));
+    bins[i]++;
+  });
+
+  createOrUpdateChart(
+    "confidenceChart","bar",
+    ["0–20%","20–40%","40–60%","60–80%","80–100%"],
+    bins,"Detection confidence"
+  );
+}
+
+/* EXPORTS */
+
+function allExportFeatures(){
+  return [
+    ...getFilteredBuildings().map(f=>({
+      ...f,
+      properties:{...f.properties,analysis_source:"OSM building inventory"}
+    })),
+    ...getFilteredRoads().map(f=>({
+      ...f,
+      properties:{...f.properties,analysis_source:"OSM road inventory"}
+    })),
+    ...getFilteredDetections().map(f=>({
+      ...f,
+      properties:{...f.properties,analysis_source:"Imported detection"}
+    }))
+  ];
+}
+
+function downloadBlob(content,filename,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+$("exportGeoJSONBtn").addEventListener("click",()=>{
+  const fc={
+    type:"FeatureCollection",
+    name:"Gambia_GEOAI_Export",
+    features:allExportFeatures()
+  };
+  downloadBlob(
+    JSON.stringify(fc,null,2),
+    "Gambia_GEOAI_Spatial_Data.geojson",
+    "application/geo+json"
+  );
+  log("GeoJSON export created.","success");
+});
+
+function getFeatureCenter(feature){
+  try{
+    const center=turf.centroid(feature);
+    return center.geometry.coordinates;
+  }catch(e){
+    return [null,null];
+  }
+}
+
+$("exportCSVBtn").addEventListener("click",()=>{
+  const features=allExportFeatures();
+  const headers=[
+    "record_id","source","class","confidence",
+    "longitude","latitude","osm_id","building","highway"
+  ];
+
+  const rows=features.map((f,i)=>{
+    const p=f.properties || {};
+    const coords=getFeatureCenter(f);
+    const values=[
+      f.id || i+1,
+      p.analysis_source || p.source || "",
+      getClass(p),
+      p.confidence ?? "",
+      coords[0] ?? "",
+      coords[1] ?? "",
+      p.osm_id ?? "",
+      p.building ?? "",
+      p.highway ?? ""
+    ];
+
+    return values.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",");
+  });
+
+  downloadBlob(
+    [headers.join(","),...rows].join("\n"),
+    "Gambia_GEOAI_Spatial_Data.csv",
+    "text/csv;charset=utf-8"
+  );
+  log("CSV export created.","success");
+});
+
+/* CONTROL EVENTS */
+
+["showBuildings","showRoads","showBoundaries","showDetections","showImage"]
+.forEach(id=>$(id).addEventListener("change",refreshLayers));
+
+$("basemap").addEventListener("change",e=>setBasemap(e.target.value));
+
+$("confidence").addEventListener("input",e=>{
+  $("confidenceLabel").textContent=e.target.value+"%";
+  updateDetectionLayer();
+  updateAnalytics();
+});
+
+$("classFilter").addEventListener("change",()=>{
+  updateDetectionLayer();
+  updateAnalytics();
+});
+
+$("adminFilter").addEventListener("change",()=>{
+  const area=selectedAreaFeature();
+  if(area){
+    try{map.fitBounds(L.geoJSON(area).getBounds());}catch(e){}
+  }else{
+    map.setView([13.45,-15.5],8);
+  }
+  updateAnalytics();
+});
+
+$("adminLevel").addEventListener("change",()=>{
+  if(state.boundaries.length){
+    runTask("Boundary level update",loadBoundaries);
+  }
+});
+
+/* RESET */
+
+$("resetBtn").addEventListener("click",()=>{
+  state.buildings=[];
+  state.roads=[];
+  state.boundaries=[];
+  state.detections=[];
+
+  state.buildingLayer.clearLayers();
+  state.roadLayer.clearLayers();
+  state.boundaryLayer.clearLayers();
+  state.detectionLayer.clearLayers();
+
+  if(state.imageOverlay){
+    map.removeLayer(state.imageOverlay);
+    state.imageOverlay=null;
+  }
+
+  if(state.imageURL){
+    URL.revokeObjectURL(state.imageURL);
+    state.imageURL=null;
+  }
+
+  $("detectionFile").value="";
+  $("imageFile").value="";
+  $("adminFilter").innerHTML='<option value="">All Gambia</option>';
+  $("classFilter").innerHTML='<option value="">All classes</option>';
+  $("confidence").value=0;
+  $("confidenceLabel").textContent="0%";
+
+  Object.keys(state.charts).forEach(key=>{
+    state.charts[key].destroy();
+  });
+  state.charts={};
+
+  map.setView([13.45,-15.5],8);
+  updateAnalytics();
+  refreshLayers();
+
+  $("log").textContent="Dashboard reset.\nWaiting for online data retrieval...";
+  setProgress(0,"Waiting for data request.");
+  setStatus("ONLINE DATA READY");
+});
+
+/* STARTUP */
+
+updateAnalytics();
+refreshLayers();
+
+log("Gambia GEOAI dashboard initialised.","success");
+log("Map basemap loaded. No detection or building data has been fabricated.");
+log("Click Fetch Gambia Data to retrieve available online features.");
+
+</script>
+</body>
+</html>
